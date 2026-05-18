@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>追番记 v6.0</title>
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+<style>
+
+:root{--bg:#0b0b1a;--bg2:#1a1a2e;--card:rgba(21,21,36,.7);--card-hover:rgba(28,28,46,.85);--border:#252540;--primary:#e94560;--primary-hover:#ff5a75;--primary-dim:rgba(233,69,96,.15);--primary-glow:rgba(233,69,96,.3);--text:#e8e8f0;--text2:#8888aa;--text3:#555570;--success:#2ecc71;--orange:#f39c12;--radius:12px;--radius-sm:8px;--shadow:0 2px 12px rgba(0,0,0,.25);--shadow-lg:0 8px 32px rgba(0,0,0,.4);--transition:.25s cubic-bezier(.4,0,.2,1);--font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
+input,textarea,select{-webkit-user-select:auto;user-select:auto}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);min-height:100vh;background:linear-gradient(135deg,var(--bg)0%,var(--bg2)50%,#16213e 100%);background-attachment:fixed;color:var(--text)}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80%50%at 50%-20%,rgba(233,69,96,.1)0%,transparent 60%),radial-gradient(ellipse 50%40%at 80%80%,rgba(46,204,113,.06)0%,transparent 50%),radial-gradient(ellipse 40%30%at 20%70%,rgba(52,152,219,.06)0%,transparent 50%);pointer-events:none;z-index:0;animation:bgShift 20s ease-in-out infinite alternate}
+@keyframes bgShift{0%{transform:translate(0,0)}100%{transform:translate(2%,1%)rotate(1deg)}}
+input,select,textarea,button{font-family:var(--font)}
+.container{max-width:1000px;margin:0 auto;padding:16px 20px;position:relative;z-index:1}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 0 12px}
+header h1{font-size:22px;background:linear-gradient(135deg,var(--primary)0%,#ff8a5c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr-badge{font-size:10px;vertical-align:super;background:var(--primary-dim);color:var(--primary);padding:1px 6px;border-radius:8px;-webkit-text-fill-color:var(--primary)}
+.hdr-actions{display:flex;gap:6px;align-items:center}
+.hdr-actions .hdr-count{font-size:12px;color:var(--text3);background:var(--card);padding:4px 10px;border-radius:10px;border:1px solid var(--border);backdrop-filter:blur(8px)}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:6px 8px;border-radius:var(--radius-sm);color:var(--text2);transition:background var(--transition)}
+.icon-btn:hover{background:var(--card-hover);color:var(--text)}
+.stats-row{display:flex;gap:12px;margin-bottom:14px}
+.stats-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:1}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;text-align:center;cursor:default;backdrop-filter:blur(8px);transition:all var(--transition)}
+.stat-card:hover{background:var(--card-hover)}
+.stat-card.sc-clickable{cursor:pointer}
+.stat-card.sc-clickable:hover{border-color:var(--text3)}
+.stat-card.sc-clickable.active{background:var(--primary-dim);border-color:var(--primary);box-shadow:0 0 16px var(--primary-glow)}
+.stat-card.sc-clickable.active .sc-num{color:var(--primary)}
+.stat-card.sc-clickable.active .sc-label{color:var(--primary)}
+.stat-card .sc-num{font-size:20px;font-weight:700}
+.stat-card .sc-label{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap}
+.donut-wrap{flex-shrink:0;width:80px;height:80px;position:relative;cursor:default}
+.donut-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut-wrap .donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2);pointer-events:none}
+.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.toolbar .search-wrap{flex:1;min-width:160px;position:relative}
+.toolbar .search-wrap input{width:100%;padding:9px 12px 9px 32px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--card);color:var(--text);outline:none;backdrop-filter:blur(8px);transition:border-color var(--transition),box-shadow var(--transition)}
+.toolbar .search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 12px rgba(233,69,96,.15)}
+.toolbar .search-wrap .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+.toolbar select{padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-size:12px;cursor:pointer;outline:none;backdrop-filter:blur(8px)}
+.toolbar select option{background:var(--bg);color:var(--text)}
+.view-toggle{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;font-size:16px;padding:6px 10px;transition:all var(--transition);line-height:1;backdrop-filter:blur(8px)}
+.view-toggle:hover{border-color:var(--text3);color:var(--text)}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;width:100%}
+.filter-row select{flex:1;min-width:80px;padding:7px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-size:11px;cursor:pointer;outline:none;backdrop-filter:blur(8px)}
+.filter-row select option{background:var(--bg);color:var(--text)}
+
+.tag-filter .tag{padding:3px 10px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:11px;color:var(--text3);background:var(--card);transition:all var(--transition);backdrop-filter:blur(8px)}
+.tag-filter .tag:hover{border-color:var(--text2);color:var(--text)}
+.tag-filter .tag.active{background:var(--primary-dim);border-color:var(--primary);color:var(--primary)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all var(--transition);position:relative;cursor:pointer;backdrop-filter:blur(12px);animation:cardIn .4s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)scale(.97)}to{opacity:1;transform:translateY(0)scale(1)}}
+.card:nth-child(1){animation-delay:0s}
+.card:nth-child(2){animation-delay:.03s}
+.card:nth-child(3){animation-delay:.06s}
+.card:nth-child(4){animation-delay:.09s}
+.card:nth-child(5){animation-delay:.12s}
+.card:nth-child(6){animation-delay:.15s}
+.card:nth-child(7){animation-delay:.18s}
+.card:nth-child(8){animation-delay:.21s}
+.card:nth-child(9){animation-delay:.24s}
+.card:nth-child(10){animation-delay:.27s}
+.card:nth-child(n+11){animation-delay:.3s}
+.card:hover{border-color:var(--text3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.card-deleting{animation:cardShrink .3s ease forwards}
+@keyframes cardShrink{to{transform:scale(.8);opacity:0;max-height:0;margin:0;padding:0;border-width:0;overflow:hidden}}
+.card-cover{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:rgba(255,255,255,.7);position:relative;user-select:none;overflow:hidden}
+.card-cover img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.card:hover .card-cover img{transform:scale(1.05)}
+.cov-overlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:11px;text-align:center;padding:4px;backdrop-filter:blur(4px);opacity:0;transition:opacity .2s;cursor:pointer}
+.card-cover:hover .cov-overlay{opacity:1}
+.grid.list{display:block}
+.grid.list .card{display:flex;flex-direction:row;margin-bottom:10px;cursor:pointer;animation:none;opacity:1}
+.grid.list .card:hover{transform:none}
+.grid.list .card-cover{width:80px;min-height:112px;height:auto;flex-shrink:0;font-size:24px;border-radius:var(--radius-sm);aspect-ratio:auto}
+.grid.list .card-cover img{border-radius:var(--radius-sm)}
+.grid.list .card-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 14px;min-width:0}
+.grid.list .card-title{margin-bottom:2px}
+.grid.list .card-progress{margin-bottom:2px}
+.grid.list .card-dates{margin-bottom:0}
+.grid.list .card-footer{margin-top:4px}
+.grid.list .card-actions{opacity:1}
+.card-body{padding:12px 14px 14px}
+.card-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.card-desc{font-size:11px;color:var(--text3);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px}
+.card-progress{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.card-progress .pb-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.card-progress .pb-bar .pb-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--primary),#ff8a5c);transition:width .5s cubic-bezier(.4,0,.2,1);position:relative}
+.card-progress .pb-bar .pb-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);animation:pbShimmer 2s infinite}
+@keyframes pbShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.card-progress .pb-bar .pb-fill.done{background:linear-gradient(90deg,var(--success),#27ae60)}
+.card-progress .pb-bar .pb-fill.done::after{content:none}
+.card-progress .pb-text{font-size:11px;color:var(--text2);white-space:nowrap;cursor:pointer}
+.card-progress .pb-text:hover{color:var(--primary)}
+.card-dates{font-size:11px;color:var(--text2);margin-bottom:4px}
+.card-stat-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--text2);white-space:nowrap;margin-left:auto;backdrop-filter:blur(4px)}
+.card-footer{display:flex;justify-content:space-between;align-items:center}
+.star-display{font-size:12px;letter-spacing:1px}
+.star-display .star-filled{color:var(--orange)}
+.star-display .star-empty{color:var(--text3)}
+.star-display .star-num{color:var(--text2);font-size:11px;margin-left:2px}
+.card-actions{display:flex;gap:4px;opacity:0;transition:opacity var(--transition)}
+.card:hover .card-actions{opacity:1}
+.card-actions button{background:none;border:none;cursor:pointer;padding:2px 4px;font-size:13px;color:var(--text2);border-radius:4px;transition:all var(--transition)}
+.card-actions button:hover{background:var(--card-hover);color:var(--text)}
+.card-actions .del:hover{color:var(--primary)}
+.empty-state{text-align:center;padding:48px 16px;color:var(--text2);grid-column:1/-1}
+.empty-state .ei{font-size:48px;margin-bottom:8px}
+.empty-state p{font-size:14px;margin-bottom:12px}
+.pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin:0 0 80px;padding:8px 0}
+.pagination .page-btn{min-width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text2);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);backdrop-filter:blur(8px)}
+.pagination .page-btn:hover{border-color:var(--text2);color:var(--text)}
+.pagination .page-btn.active{background:var(--primary-dim);border-color:var(--primary);color:var(--primary);font-weight:600}
+.pagination .page-btn:disabled{opacity:.3;cursor:default;pointer-events:none}
+.pagination .page-info{font-size:12px;color:var(--text3);padding:0 4px}
+.fab{position:fixed;bottom:24px;right:24px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#d63851);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(233,69,96,.4);transition:all var(--transition);display:flex;align-items:center;justify-content:center;z-index:50}
+.fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(233,69,96,.55)}
+.fab::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:var(--primary-glow);z-index:-1;animation:fabPulse 2s ease-in-out infinite}
+@keyframes fabPulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.15);opacity:0}}
+.fab.fab-hidden{transform:translateY(80px);opacity:0;pointer-events:none}
+.fab.fab-hidden::before{animation:none}
+.search-results{margin:-6px 0 12px;max-height:240px;overflow-y:auto;display:none;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);backdrop-filter:blur(12px)}
+.search-results.show{display:block}
+.sr-item{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;transition:background var(--transition)}
+.sr-item:hover,.sr-item.sr-highlighted{background:var(--card-hover)}
+.sr-item:not(:last-child){border-bottom:1px solid var(--border)}
+.sr-item img{width:40px;height:56px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--border)}
+.sr-item .si-info{flex:1;min-width:0}
+.sr-item .si-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-item .si-meta{font-size:11px;color:var(--text2);margin-top:1px}
+.sr-loading{text-align:center;padding:16px;color:var(--text2);font-size:13px}
+.sr-none{text-align:center;padding:16px;color:var(--text3);font-size:13px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;place-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:grid}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:700px;width:92%;overflow:auto;min-width:320px;max-height:90vh;box-shadow:var(--shadow-lg);backdrop-filter:blur(16px);animation:modalIn .25s ease both}
+.modal-sm{max-width:480px}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)translateY(-8px)}to{opacity:1;transform:scale(1)translateY(0)}}
+.modal h2{font-size:17px;margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(11,11,26,.6);color:var(--text);font-size:13px;outline:none;transition:border-color var(--transition),box-shadow var(--transition)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 12px rgba(233,69,96,.12)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+.star-selector{display:flex;gap:2px;align-items:center}
+.star-selector .star-opt{cursor:pointer;font-size:22px;color:var(--text3);transition:color .15s,transform .15s;user-select:none;line-height:1}
+.star-selector .star-opt:hover{transform:scale(1.2)}
+.star-selector .star-opt.on{color:var(--orange)}
+.star-selector .star-opt.off:hover{color:var(--orange)}
+.star-selector .star-label{font-size:12px;color:var(--text2);margin-left:6px;min-width:24px}
+
+.tag-chips .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--primary-dim);color:var(--primary);border-radius:10px;font-size:11px}
+.tag-chips .chip .chip-del{cursor:pointer;font-weight:700;font-size:13px;line-height:1;opacity:.7}
+.tag-chips .chip .chip-del:hover{opacity:1}
+
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn{padding:9px 18px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:600;transition:all var(--transition)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#d63851);color:#fff}
+.btn-primary:hover{background:linear-gradient(135deg,var(--primary-hover),#e94560);box-shadow:0 2px 12px rgba(233,69,96,.3)}
+.btn-secondary{background:var(--border);color:var(--text)}
+.btn-secondary:hover{background:var(--text3)}
+.btn-danger{background:transparent;border:1px solid var(--primary);color:var(--primary)}
+.btn-danger:hover{background:var(--primary-dim)}
+.btn-success{background:linear-gradient(135deg,var(--success),#27ae60);color:#fff}
+.btn-success:hover{box-shadow:0 2px 12px rgba(46,204,113,.3)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.set-sec{margin-bottom:20px}
+.set-sec h3{font-size:14px;margin-bottom:6px}
+.set-sec p{font-size:12px;color:var(--text2);margin-bottom:10px}
+.set-sec hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+.set-sec .backup-info{font-size:11px;color:var(--text3);margin-top:6px}
+.set-sec .stat-summary{font-size:12px;color:var(--text2);line-height:1.8}
+.prog-popup{position:fixed;z-index:150;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;box-shadow:var(--shadow-lg);display:none;min-width:180px;backdrop-filter:blur(12px);animation:modalIn .2s ease both}
+.prog-popup.show{display:block}
+.prog-popup .pp-title{font-size:13px;font-weight:600;margin-bottom:8px}
+.prog-popup .pp-row{display:flex;gap:6px;align-items:center}
+.prog-popup .pp-row input{width:60px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:rgba(11,11,26,.6);color:var(--text);font-size:14px;text-align:center;outline:none}
+.prog-popup .pp-row input:focus{border-color:var(--primary)}
+.prog-popup .pp-row span{font-size:13px;color:var(--text2)}
+@keyframes confettiFall{0%{transform:translateY(0)rotate(0deg);opacity:1}100%{transform:translateY(120px)rotate(720deg);opacity:0}}
+.confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;z-index:200;pointer-events:none;animation:confettiFall 1.2s ease-out forwards}
+#toastC{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:ti .3s cubic-bezier(.4,0,.2,1);max-width:300px;pointer-events:auto;backdrop-filter:blur(12px);display:flex;align-items:center;gap:8px}
+.toast.ok{border-left:3px solid var(--success)}
+.toast.err{border-left:3px solid var(--primary)}
+.toast.undo{border-left:3px solid var(--orange);cursor:pointer;display:flex;align-items:center;gap:10px}
+.toast.undo span{font-size:11px;color:var(--orange);white-space:nowrap}
+@keyframes ti{from{transform:translateX(100%)scale(.9);opacity:0}to{transform:translateX(0)scale(1);opacity:1}}
+.viewer-content{position:relative;max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center}
+.viewer-content img{max-width:100%;max-height:85vh;border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.viewer-close{position:absolute;top:-32px;right:0;color:#fff;font-size:28px;cursor:pointer;opacity:.7;transition:opacity .2s}
+.viewer-close:hover{opacity:1}
+@media(max-width:600px){.container{padding:10px 12px}.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.card-cover{height:90px;font-size:30px}.card-body{padding:10px 12px}.card-title{font-size:13px}.stats-row{flex-direction:column}.stats-cards{grid-template-columns:repeat(4,1fr)}.donut-wrap{width:60px;height:60px;align-self:center}.fab{bottom:16px;right:16px;width:44px;height:44px;font-size:22px}.fab::before{content:none}.filter-row select{font-size:11px;padding:7px 6px}.prog-popup{position:fixed;top:50%!important;left:50%!important;transform:translate(-50%,-50%);min-width:220px;box-shadow:0 8px 40px rgba(0,0,0,.5)}.toast{max-width:260px;font-size:12px}.card:nth-child(n){animation-delay:0s}.modal{padding:16px}.form-row{flex-direction:column;gap:0}}
+
+.memo-md-body h1,.memo-md-body h2,.memo-md-body h3{margin:.6em 0 .3em;color:var(--text)}.memo-md-body h1{font-size:20px}.memo-md-body h2{font-size:17px}.memo-md-body h3{font-size:14px}.memo-md-body p{margin:0 0 .5em}.memo-md-body ul{padding-left:20px;margin:0 0 .5em}.memo-md-body li{margin-bottom:4px}.memo-md-body code{background:var(--primary-dim);color:var(--primary);padding:1px 5px;border-radius:4px;font-size:12px}.memo-md-body pre{background:var(--bg);padding:12px;border-radius:var(--radius-sm);overflow-x:auto;margin:8px 0;border:1px solid var(--border)}.memo-md-body pre code{background:none;padding:0;color:var(--text)}.memo-md-body a{color:var(--primary);text-decoration:underline}.memo-md-body strong{font-weight:700}.memo-md-body em{font-style:italic}.memo-md-body img{max-width:100%;height:auto;border-radius:8px;margin:8px 0;display:block}
+
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <header>
+    <h1>动漫小屋</h1>
+    <div class="hdr-actions">
+      <span class="hdr-count" id="hdrCount">0 部</span>
+      <button class="icon-btn" id="btnSettings" title="设置">⚙️</button>
+    </div>
+  </header>
+  <div class="stats-row" id="statsBar">
+    <div class="stats-cards">
+      <div class="stat-card sc-clickable" data-tab="all"><div class="sc-num" id="stTotal">0</div><div class="sc-label">全部</div></div>
+      <div class="stat-card sc-clickable" data-tab="watching"><div class="sc-num" id="stWatching">0</div><div class="sc-label">▶️ 在看</div></div>
+      <div class="stat-card sc-clickable" data-tab="completed"><div class="sc-num" id="stCompleted">0</div><div class="sc-label">✅ 看完</div></div>
+      <div class="stat-card sc-clickable" data-tab="wish"><div class="sc-num" id="stWish">0</div><div class="sc-label">📌 想看</div></div>
+      <div class="stat-card sc-clickable" data-tab="dropped"><div class="sc-num" id="stDropped">0</div><div class="sc-label">💀 弃番</div></div>
+      <div class="stat-card sc-clickable" data-tab="paused"><div class="sc-num" id="stPaused">0</div><div class="sc-label">⏸ 搁置</div></div>
+      <div class="stat-card"><div class="sc-num" id="stAvg">-</div><div class="sc-label">⭐ 均分</div></div>
+      <div class="stat-card sc-clickable" id="memoTrigger"><div class="sc-num">📝</div><div class="sc-label">备忘录</div></div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="search-wrap"><span class="si">🔍</span><input id="searchInput" placeholder="搜索番名、简介或标签..."></div>
+    <select id="sortSelect">
+      <option value="newest">最新添加</option>
+      <option value="oldest">最早添加</option>
+      <option value="updated">最近更新</option>
+      <option value="rating">评分最高</option>
+      <option value="title">名称 A-Z</option>
+      <option value="progress">进度最高</option>
+    </select>
+    <button class="view-toggle" id="viewToggle" title="切换视图">⊞</button>
+    <div class="filter-row" id="filterRow">
+      <select id="filterYear"><option value="">年份</option></select>
+      <select id="filterSeason"><option value="">季度</option><option value="winter">❄️ 冬</option><option value="spring">🌸 春</option><option value="summer">☀️ 夏</option><option value="fall">🍂 秋</option></select>
+      <select id="filterRating"><option value="">评分</option><option value="10">10</option><option value="9">9</option><option value="8">8</option><option value="7">7</option><option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select>
+    </div>
+  </div>
+  <div class="grid" id="animeGrid"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+<button class="fab" id="fabAdd">+</button>
+
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <h2 id="formTitle">添加番剧</h2>
+    <div class="form-group"><label>名称 *</label><input id="fTitle" placeholder="输入番名自动搜索..." autocomplete="off"></div>
+    <div class="search-results" id="searchResults"></div>
+    <div class="form-group"><label>别名</label><input id="fAlt" placeholder="Shingeki no Kyojin"></div>
+    <div class="form-row">
+      <div class="form-group"><label>总集数</label><input id="fTotal" type="number" min="0" placeholder="24"></div>
+      <div class="form-group"><label>已看集数</label><input id="fWatched" type="number" min="0" placeholder="12"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>状态</label>
+        <select id="fStatus"><option value="wish">📌 想看</option><option value="watching">▶️ 在看</option><option value="completed">✅ 已看完</option><option value="dropped">💀 弃番</option><option value="paused">⏸ 搁置</option></select>
+      </div>
+      <div class="form-group">
+        <label>我的评分</label>
+        <div class="star-selector" id="starSelector"></div>
+        <input type="hidden" id="fRating" value="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>市面评分</label><input id="fPublicRating" type="number" step="0.1" min="0" max="10" placeholder="从 Bangumi 自动获取"></div>
+      <div class="form-group"><label>封面图 URL</label><input id="fCover" placeholder="https://..."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>开始日期</label><input id="fStartDate" type="date"></div>
+      <div class="form-group"><label>开始时间</label><input id="fStartTime" type="time"></div>
+      <div class="form-group"><label>结束日期</label><input id="fEndDate" type="date"></div>
+      <div class="form-group"><label>结束时间</label><input id="fEndTime" type="time"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>年份</label><input id="fYear" type="number" min="1900" max="2100" placeholder="2026"></div>
+      <div class="form-group"><label>季度</label>
+        <select id="fSeason"><option value="">不限</option><option value="winter">❄️ 冬</option><option value="spring">🌸 春</option><option value="summer">☀️ 夏</option><option value="fall">🍂 秋</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>简介</label><textarea id="fDescription" rows="3" placeholder="剧情简介（搜索番剧后自动填充）"></textarea></div>
+    <div class="form-group"><label>简评</label><textarea id="fComment" rows="2" placeholder="写点感想..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnFormCancel">取消</button>
+      <button class="btn btn-primary" id="btnFormSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal modal-sm">
+    <h2>⚙️ 设置</h2>
+    <div class="set-sec"><h3>📊 数据统计</h3><div class="stat-summary" id="statSummary">加载中...</div></div>
+    <hr>
+    <div class="set-sec"><h3>📤 导出数据</h3><p>导出为 JSON 文件，可在另一设备导入</p><button class="btn btn-success" id="btnExport">导出 JSON</button></div>
+    <hr>
+    <div class="set-sec"><h3>📥 导入数据</h3><p>选择之前导出的 JSON 文件，重复番剧不会覆盖</p><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn btn-primary" id="btnImportTrigger">选择文件</button><input type="file" id="btnImport" accept=".json" style="display:none"></div></div>
+    <hr>
+    <div class="set-sec"><h3>💾 数据备份</h3><p>每次修改数据时自动备份到 localStorage</p><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn btn-secondary" id="btnRestoreBackup">从备份恢复</button><button class="btn btn-danger" id="btnClearBackups">清除备份</button></div><div class="backup-info" id="backupInfo">暂无备份</div></div>
+    <hr>
+    <div class="set-sec"><h3>🗑 重置数据</h3><p>清空所有番剧记录（不可恢复，建议先导出）</p><button class="btn btn-danger" id="btnResetData" style="opacity:.7">清空所有数据</button></div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="btnSettingsClose">关闭</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="viewerModal">
+  <div class="viewer-content"><span class="viewer-close" id="viewerClose">&times;</span><img id="viewerImg" src="" alt=""></div>
+</div>
+	<div class="modal-overlay" id="memoModal">
+	  <div class="modal" style="max-width:650px">
+	    <h2>📝 备忘录</h2>
+	    <div style="display:flex;gap:8px;margin-bottom:12px">
+	      <button class="btn btn-primary btn-sm" id="memoEditBtn">编辑</button>
+	      <button class="btn btn-secondary btn-sm" id="memoPreviewBtn">预览</button>
+	      <button class="btn btn-secondary btn-sm" id="memoImgBtn">🖼 插入图片</button>
+	    </div>
+	    <textarea id="memoEditor" style="display:block;width:100%;min-height:300px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(11,11,26,.6);color:var(--text);font-size:14px;font-family:var(--font);outline:none;resize:vertical;line-height:1.7" placeholder="支持 Markdown 格式
+
+# 标题
+**粗体** *斜体*
+- 列表
+`代码`
+[链接](url)
+
+支持粘贴图片 (Ctrl+V)"></textarea>
+	    <div id="memoPreview" style="display:none;width:100%;min-height:300px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(11,11,26,.6);color:var(--text);font-size:14px;line-height:1.7;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word"></div>
+	    <div class="modal-actions">
+	      <button class="btn btn-secondary" id="memoCloseBtn">关闭</button>
+	      <button class="btn btn-primary" id="memoSaveBtn">保存</button>
+	    </div>
+	  </div>
+	</div>
+<div id="toastC"></div>
+<input type="file" id="coverFileInput" accept="image/*" style="display:none">
+<input type="file" id="memoFileInput" accept="image/*" style="display:none">
+
+<script>
+(function() {
+'use strict';
+const SK='anime_tracker_data_v4';
+const BK='anime_tracker_backup_';
+const PER_PAGE=24;
+const SL={all:'全部',wish:'📌 想看',watching:'▶️ 在看',completed:'✅ 已看完',dropped:'💀 弃番',paused:'⏸ 搁置'};
+const SK2=['all','wish','watching','completed','dropped','paused'];
+const SC={wish:'#f39c12',watching:'#3498db',completed:'#2ecc71',dropped:'#e94560',paused:'#9b59b6'};
+const CC=['#e94560','#0f3460','#2ecc71','#9b59b6','#3498db','#f39c12','#1abc9c','#e67e22','#e74c3c','#2c3e50'];
+let animeList=[],editingId=null,currentStatus='all',currentSearch='',currentSort='newest';
+let filterYear='',filterSeason='',filterRating='';
+let displayMode=localStorage.getItem(SK+'_view')||'grid';
+let currentPage=1,lastScrollY=0,searchTimer2=null,coverChangingId=null;
+const $=id=>document.getElementById(id);
+const gridEl=$('animeGrid'),toastC=$('toastC'),searchInput=$('searchInput');
+const sortSelect=$('sortSelect'),filterYearEl=$('filterYear'),filterSeasonEl=$('filterSeason');
+const filterRatingEl=$('filterRating'),viewToggle=$('viewToggle'),fabAdd=$('fabAdd'),paginationEl=$('pagination');
+function loadData(){try{animeList=JSON.parse(localStorage.getItem(SK))||[]}catch{animeList=[]}}
+function saveData(){localStorage.setItem(SK,JSON.stringify(animeList));createBackup();updateHeaderCount();populateYearFilter()}
+function genId(){return Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6)}
+function nowStr(){return new Date().toISOString().slice(0,10)}
+function nowISO(){return new Date().toISOString()}
+function esc(s){if(typeof s!=='string')return '';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+
+
+function createBackup(){try{const key=BK+nowStr();if(localStorage.getItem(key))return;const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(BK))keys.push(k)}keys.sort().reverse();if(keys.length>=30)keys.slice(29).forEach(k=>localStorage.removeItem(k));localStorage.setItem(key,JSON.stringify(animeList));updateBackupInfo()}catch{}}
+function getBackupDates(){const dates=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(BK))dates.push(k.slice(BK.length))}return dates.sort().reverse()}
+function updateBackupInfo(){const dates=getBackupDates();$('backupInfo').textContent=dates.length?'最近备份：'+dates.slice(0,5).join(', ')+(dates.length>5?' 等 '+dates.length+' 个':''):'暂无备份'}
+function restoreFromBackup(){const dates=getBackupDates();if(!dates.length){toast('没有备份可用','err');return}const key=BK+dates[0];try{const data=JSON.parse(localStorage.getItem(key));if(!Array.isArray(data))throw Error();animeList=data;saveData();renderAll();toast('已从 '+dates[0]+' 的备份恢复')}catch{toast('备份数据损坏','err')}}
+function clearBackups(){const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(BK))keys.push(k)}keys.forEach(k=>localStorage.removeItem(k));updateBackupInfo();toast('已清除所有备份')}
+function fireConfetti(){const colors=['#e94560','#f39c12','#2ecc71','#3498db','#9b59b6','#ff8a5c','#1abc9c'];for(let i=0;i<24;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.background=colors[Math.floor(Math.random()*colors.length)];el.style.left=(10+Math.random()*80)+'vw';el.style.top='-10px';el.style.width=(4+Math.random()*6)+'px';el.style.height=(4+Math.random()*6)+'px';el.style.borderRadius=Math.random()>0.5?'50%':'2px';el.style.animationDuration=(0.8+Math.random()*0.8)+'s';el.style.animationDelay=(Math.random()*0.3)+'s';document.body.appendChild(el);setTimeout(()=>el.remove(),2000)}}
+function toast(msg,type){type=type||'ok';const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;toastC.appendChild(el);el.addEventListener('click',()=>remove(el));setTimeout(()=>remove(el),2800);function remove(el){if(!el.parentNode)return;el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)}}
+function toastUndo(msg,undoFn){const el=document.createElement('div');el.className='toast undo';el.innerHTML=msg+' <span data-action="undo">撤销</span>';el.querySelector('[data-action="undo"]').addEventListener('click',e=>{e.stopPropagation();undoFn();el.remove()});toastC.appendChild(el);el.addEventListener('click',()=>el.remove());setTimeout(()=>{if(el.parentNode){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)}},4000)}
+
+
+function renderStars(r){const v=r||0;let h='';for(let i=1;i<=10;i++)h+='<span class="'+(i<=v?'star-filled':'star-empty')+'">'+(i<=v?'★':'☆')+'</span>';if(v>0)h+='<span class="star-num">'+v+'/10</span>';else h='<span class="star-empty">☆☆☆☆☆☆☆☆☆☆</span>';return '<span class="star-display">'+h+'</span>'}
+function initStarSelector(v){const c=$('starSelector');if(!c)return;c.innerHTML='';for(let i=1;i<=10;i++){const s=document.createElement('span');s.className='star-opt'+(i<=v?' on':' off');s.textContent='★';s.dataset.val=i;s.addEventListener('click',()=>setStarValue(i));c.appendChild(s)}const l=document.createElement('span');l.className='star-label';l.id='starLabel';l.textContent=v>0?v+'/10':'';c.appendChild(l)}
+function setStarValue(v){$('fRating').value=v;const s=$('starSelector').querySelectorAll('.star-opt');s.forEach((x,i)=>{x.className='star-opt'+(i<v?' on':' off')});const l=$('starLabel');if(l)l.textContent=v+'/10'}
+function renderAll(){renderStats();renderGrid()}
+function renderStats(){const t=animeList.length,w=animeList.filter(a=>a.status==='wish').length,wa=animeList.filter(a=>a.status==='watching').length,c=animeList.filter(a=>a.status==='completed').length,d=animeList.filter(a=>a.status==='dropped').length,p=animeList.filter(a=>a.status==='paused').length,r=animeList.filter(a=>a.rating>0);const avg=r.length?(r.reduce((s,a)=>s+a.rating,0)/r.length).toFixed(1):'-';$('stTotal').textContent=t;$('stWish').textContent=w;$('stWatching').textContent=wa;$('stCompleted').textContent=c;$('stDropped').textContent=d;$('stPaused').textContent=p;$('stAvg').textContent=avg}
+function updateHeaderCount(){$('hdrCount').textContent=animeList.length+' 部'}
+function getCoverColor(t){let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))&0x7fffffff;return CC[h%CC.length]}
+function getInitial(t){const m=t.match(/[\u4e00-\u9fff]/);if(m)return m[0];return t.charAt(0).toUpperCase()}
+
+
+function getFilteredAndSorted(){let arr=[...animeList];if(currentStatus!=='all')arr=arr.filter(a=>a.status===currentStatus);if(currentSearch){const q=currentSearch.toLowerCase();arr=arr.filter(a=>(a.title||'').toLowerCase().includes(q)||(a.alt_title||'').toLowerCase().includes(q)||(a.description||'').toLowerCase().includes(q)||(a.comment||'').toLowerCase().includes(q))}if(filterYear)arr=arr.filter(a=>String(a.year)===filterYear);if(filterSeason)arr=arr.filter(a=>a.season===filterSeason);if(filterRating){const v=parseInt(filterRating);arr=arr.filter(a=>a.rating===v)}switch(currentSort){case'newest':arr.sort((a,b)=>b.createdAt.localeCompare(a.createdAt));break;case'oldest':arr.sort((a,b)=>a.createdAt.localeCompare(b.createdAt));break;case'updated':arr.sort((a,b)=>{const au=a.updatedAt||a.createdAt;const bu=b.updatedAt||b.createdAt;return bu.localeCompare(au)});break;case'rating':arr.sort((a,b)=>b.rating-a.rating||b.createdAt.localeCompare(a.createdAt));break;case'title':arr.sort((a,b)=>a.title.localeCompare(b.title));break;case'progress':arr.sort((a,b)=>{const bp=b.total_episodes>0?b.watched_episodes/b.total_episodes:0;const ap=a.total_episodes>0?a.watched_episodes/a.total_episodes:0;return bp-ap});break}return arr}
+function renderPagination(ti){const tp=Math.max(1,Math.ceil(ti/PER_PAGE));if(currentPage>tp)currentPage=tp;if(tp<=1){paginationEl.innerHTML='';return}let h='<button class="page-btn" id="pagePrev"'+(currentPage<=1?' disabled':'')+'>‹</button>';const r2=2,s=Math.max(1,currentPage-r2),e=Math.min(tp,currentPage+r2);if(s>1){h+='<button class="page-btn" data-page="1">1</button>';if(s>2)h+='<span class="page-info">...</span>'}for(let i=s;i<=e;i++)h+='<button class="page-btn'+(i===currentPage?' active':'')+'" data-page="'+i+'">'+i+'</button>';if(e<tp){if(e<tp-1)h+='<span class="page-info">...</span>';h+='<button class="page-btn" data-page="'+tp+'">'+tp+'</button>'}h+='<button class="page-btn" id="pageNext"'+(currentPage>=tp?' disabled':'')+'>›</button>';paginationEl.innerHTML=h;const p=$('pagePrev'),n=$('pageNext');if(p)p.addEventListener('click',()=>{if(currentPage>1){currentPage--;renderGrid()}});if(n)n.addEventListener('click',()=>{if(currentPage<tp){currentPage++;renderGrid()}});paginationEl.querySelectorAll('.page-btn[data-page]').forEach(el=>{el.addEventListener('click',()=>{currentPage=parseInt(el.dataset.page);renderGrid()})})}
+
+
+function renderGrid(){const arr=getFilteredAndSorted();const ti=arr.length;const si=(currentPage-1)*PER_PAGE;const pi=arr.slice(si,si+PER_PAGE);gridEl.className='grid'+(displayMode==='list'?' list':'');if(!pi.length){const hf=currentSearch||filterYear||filterSeason||filterRating||currentStatus!=='all';gridEl.innerHTML='<div class="empty-state"><div class="ei">'+(ti?'🔍':'📭')+'</div><p>'+(animeList.length?'没有匹配的番剧':'还没有记录，点 + 添加吧')+'</p>'+(hf?'<button class="btn btn-secondary" id="clearFiltersBtn">清除筛选</button>':'')+'</div>';const cb=gridEl.querySelector('#clearFiltersBtn');if(cb)cb.addEventListener('click',clearAllFilters);renderPagination(ti);return}gridEl.innerHTML=pi.map(a=>{const pct=a.total_episodes>0?Math.min(100,Math.round((a.watched_episodes/a.total_episodes)*100)):0;const isD=a.status==='completed';const cc=getCoverColor(a.title);const init=getInitial(a.title);const desc=a.description||'';const ds=desc.length>60?desc.slice(0,60)+'…':desc;const rh=a.rating>0?'<span class="star-display">'+Array(Math.min(a.rating,10)).fill('★').join('')+Array(Math.max(0,10-a.rating)).fill('☆').join('')+'<span class="star-num">'+a.rating+'/10</span></span>':'<span class="star-display"><span class="star-empty">☆☆☆☆☆☆☆☆☆☆</span></span>';return '<div class="card" data-id="'+esc(a.id)+'"><div class="card-cover" style="background:linear-gradient(135deg,'+cc+','+cc+'88)">'+(a.cover_url?'<img src="'+esc(a.cover_url)+'" alt="" loading="lazy" onerror="this.remove()">':init)+'<div class="cov-overlay">📷 更换图片</div></div><div class="card-body"><div class="card-title" title="'+esc(a.title)+'">'+esc(a.title)+'</div>'+(ds?'<div class="card-desc">'+esc(ds)+'</div>':'')+'<div class="card-progress">'+(a.total_episodes>0?'<div class="pb-bar"><div class="pb-fill'+(isD?' done':'')+'" style="width:'+pct+'%"></div></div><span class="pb-text">'+(a.watched_episodes||0)+'/'+a.total_episodes+'</span>':'<span class="pb-text">'+(a.watched_episodes||0)+' 集</span>')+'<span class="card-stat-badge">'+(SL[a.status]||a.status)+'</span></div>'+(a.start_date||a.end_date?'<div class="card-dates">📅'+(a.start_date?' '+esc(a.start_date.replace('T',' ')):'')+(a.start_date&&a.end_date?' →':'')+(a.end_date?(a.start_date?' ':' 结束 ')+esc(a.end_date.replace('T',' ')):'')+'</div>':'')+'<div class="card-footer"><div>'+rh+'</div><div class="card-actions"><button class="act-edit">✏️</button><button class="act-del">🗑</button></div></div></div></div>'}).join('');gridEl.querySelectorAll('.card').forEach(el=>{const id=el.dataset.id;el.addEventListener('dblclick',()=>openForm(id))});gridEl.querySelectorAll('.card-cover').forEach(el=>{const id=el.closest('.card').dataset.id;el.addEventListener('dblclick',e=>{e.stopPropagation();viewCover(id)});const ov=el.querySelector('.cov-overlay');if(ov)ov.addEventListener('click',()=>changeCover(id))});gridEl.querySelectorAll('.act-edit').forEach(el=>{const id=el.closest('.card').dataset.id;el.addEventListener('click',e=>{e.stopPropagation();openForm(id)})});gridEl.querySelectorAll('.act-del').forEach(el=>{const id=el.closest('.card').dataset.id;el.addEventListener('click',e=>{e.stopPropagation();deleteAnime(id,el.closest('.card'))})});gridEl.querySelectorAll('.pb-text').forEach(el=>{const id=el.closest('.card').dataset.id;el.addEventListener('click',e=>{e.stopPropagation();showProgInput(id,el)})});renderPagination(ti)}
+
+
+function clearAllFilters(){currentSearch='';filterYear='';filterSeason='';filterRating='';currentStatus='all';currentPage=1;searchInput.value='';filterYearEl.value='';filterSeasonEl.value='';filterRatingEl.value='';document.querySelectorAll('#statsBar .sc-clickable').forEach(s=>s.classList.remove('active'));const at=document.querySelector('#statsBar .sc-clickable[data-tab="all"]');if(at)at.classList.add('active');renderGrid()}
+function populateYearFilter(){const sel=filterYearEl;if(!sel)return;const years=new Set();animeList.forEach(a=>{if(a.year)years.add(a.year)});const sorted=[...years].sort((a,b)=>b-a);const cv=sel.value;sel.innerHTML='<option value="">年份</option>'+sorted.map(y=>'<option value="'+y+'">'+y+'</option>').join('');sel.value=cv}
+
+function showProgInput(id,targetEl){const a=animeList.find(x=>x.id===id);if(!a)return;document.querySelectorAll('.prog-popup').forEach(el=>el.remove());const popup=document.createElement('div');popup.className='prog-popup show';popup.innerHTML='<div class="pp-title">'+esc(a.title)+' - 进度</div><div class="pp-row"><input type="number" id="ppInput" min="0" max="'+(a.total_episodes||9999)+'" value="'+(a.watched_episodes||0)+'">'+(a.total_episodes>0?'<span>/ '+a.total_episodes+'</span>':'<span>集</span>')+'<button class="btn btn-primary" id="ppSave" style="padding:6px 12px;font-size:12px">确定</button></div>';document.body.appendChild(popup);if(window.innerWidth>600&&targetEl){const rect=targetEl.getBoundingClientRect();popup.style.left=Math.min(rect.left,window.innerWidth-210)+'px';popup.style.top=(rect.top-10)+'px'}const input=popup.querySelector('#ppInput');input.focus();input.select();input.onkeydown=e=>{if(e.key==='Enter')saveProg();if(e.key==='Escape')popup.remove()};popup.querySelector('#ppSave').onclick=saveProg;function saveProg(){const val=parseInt(input.value);if(isNaN(val)||val<0)return;const wc=a.status==='completed';a.watched_episodes=val;if(a.total_episodes>0&&val>=a.total_episodes)a.status='completed';else if(a.total_episodes>0&&val<a.total_episodes&&a.status==='completed')a.status='watching';a.updatedAt=nowISO();saveData();renderAll();if(a.status==='completed'&&!wc)fireConfetti();toast('进度已更新');window.nareSay('进展不错呢，要继续追吗？','👍');popup.remove()}setTimeout(()=>{document.addEventListener('click',closeProg,{once:true})},10);function closeProg(e){if(!popup.contains(e.target))popup.remove()}}
+function changeCover(id){coverChangingId=id;$('coverFileInput').click()}
+function viewCover(id){const a=animeList.find(x=>x.id===id);if(!a||!a.cover_url)return;$('viewerImg').src=a.cover_url;$('viewerModal').classList.add('show')}
+function deleteAnime(id,cardEl){const idx=animeList.findIndex(x=>x.id===id);if(idx===-1)return;if(cardEl)cardEl.classList.add('card-deleting');const deleted=animeList.splice(idx,1)[0];saveData();window.nareSay('啊…这部不好看吗？那换一部吧～','😅');setTimeout(()=>renderAll(),300);toastUndo('已删除「'+deleted.title+'」',()=>{animeList.push(deleted);saveData();renderAll();toast('已撤销删除')})}
+
+function openForm(id){editingId=id||null;const modal=$('formModal');$('formTitle').textContent=id?'编辑番剧':'添加番剧';$('btnFormSave').textContent=id?'保存':'添加';if(id){const a=animeList.find(x=>x.id===id);if(!a)return;$('fTitle').value=a.title||'';$('fAlt').value=a.alt_title||'';$('fTotal').value=a.total_episodes||0;$('fWatched').value=a.watched_episodes||0;$('fStatus').value=a.status||'wish';initStarSelector(a.rating||0);setStarValue(a.rating||0);$('fPublicRating').value=a.public_rating||'';$('fCover').value=a.cover_url||'';$('fStartDate').value=a.start_date?a.start_date.split('T')[0]:'';$('fStartTime').value=a.start_date?(a.start_date.split('T')[1]||''):'';$('fEndDate').value=a.end_date?a.end_date.split('T')[0]:'';$('fEndTime').value=a.end_date?(a.end_date.split('T')[1]||''):'';$('fYear').value=a.year||'';$('fSeason').value=a.season||'';$('fComment').value=a.comment||'';$('fDescription').value=a.description||'';}else{['fTitle','fAlt','fCover','fComment','fDescription'].forEach(k=>$(k).value='');$('fStartDate').value='';$('fStartTime').value='';$('fEndDate').value='';$('fEndTime').value='';$('fTotal').value=0;$('fWatched').value=0;$('fStatus').value='wish';initStarSelector(0);setStarValue(0);$('fPublicRating').value='';$('fYear').value='';$('fSeason').value='';}modal.classList.add('show');if(!id)$('fTitle').focus()}
+function autoFillWatched(){const s=$('fStatus').value;const t=parseInt($('fTotal').value)||0;if(s==='wish')$('fWatched').value=0;else if(s==='completed'&&t>0)$('fWatched').value=t}
+function closeForm(){$('formModal').classList.remove('show');$('searchResults').classList.remove('show');editingId=null}
+function saveForm(){const title=$('fTitle').value.trim();if(!title){toast('名称不能为空','err');return}const id=editingId||genId();const body={id,title,alt_title:$('fAlt').value.trim(),total_episodes:parseInt($('fTotal').value)||0,watched_episodes:parseInt($('fWatched').value)||0,status:$('fStatus').value,rating:parseInt($('fRating').value)||0,public_rating:parseFloat($('fPublicRating').value)||0,cover_url:$('fCover').value.trim(),start_date:(function(){var d=$('fStartDate').value,t=$('fStartTime').value;return d?(t?d+'T'+t:d):'';})(),end_date:(function(){var d=$('fEndDate').value,t=$('fEndTime').value;return d?(t?d+'T'+t:d):'';})(),year:parseInt($('fYear').value)||null,season:$('fSeason').value,comment:$('fComment').value.trim(),description:$('fDescription').value.trim()};if(body.total_episodes>0&&body.watched_episodes>=body.total_episodes)body.status='completed';const wc=editingId?(animeList.find(x=>x.id===editingId)?.status==='completed'):false;if(editingId){const idx=animeList.findIndex(x=>x.id===editingId);if(idx>-1)Object.assign(animeList[idx],body,{updatedAt:nowISO()});toast('已更新')}else{body.createdAt=nowISO();body.updatedAt=nowISO();animeList.unshift(body);toast('已添加');window.nareSay('新番入库！我记下了✨','😊')}if(body.status==='completed'&&!wc){window.nareSay('恭喜通关！🎉你是真正的冒险家！','🎉');fireConfetti()};saveData();renderAll();closeForm()}
+function getSeason(m){if(m>=3&&m<=5)return'spring';if(m>=6&&m<=8)return'summer';if(m>=9&&m<=11)return'fall';return'winter'}
+
+
+async function searchAnime(query){const c=$('searchResults');if(!query.trim()){c.classList.remove('show');return}c.innerHTML='<div class="sr-loading">🔍 搜索中...</div>';c.classList.add('show');try{const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),8000);const r=await fetch('https://api.bgm.tv/v0/search/subjects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:query,type:2,limit:8}),signal:controller.signal});clearTimeout(tid);if(!r.ok)throw Error('HTTP '+r.status);const dt=await r.json();const list=dt.data||[];if(!list.length){c.innerHTML='<div class="sr-none">未找到番剧，请手动输入</div>';return}c.innerHTML=list.slice(0,8).map(item=>{const cn=item.name_cn||item.name||'未知';const en=(item.name_cn&&item.name!==item.name_cn)?item.name:'';const img=item.images?.common||item.images?.small||'';const sc=item.rating?.score?'⭐'+item.rating.score.toFixed(1):'';return '<div class="sr-item" data-id="'+item.id+'">'+(img?'<img src="'+img+'" alt="" loading="lazy">':'<div style="width:40px;height:56px;background:var(--border);border-radius:4px"></div>')+'<div class="si-info"><div class="si-title">'+esc(cn)+'</div><div class="si-meta">'+esc(en)+(sc?' · '+sc:'')+'</div></div></div>'}).join('');c.querySelectorAll('.sr-item').forEach(el=>{el.addEventListener('click',async()=>{const sid=el.dataset.id;c.innerHTML='<div class="sr-loading">获取详情中...</div>';try{const d=await fetchSubjectDetail(sid);$('fTitle').value=d.title;$('fAlt').value=d.alt_title;$('fCover').value=d.cover;$('fTotal').value=d.total_episodes;$('fYear').value=d.year;$('fSeason').value=d.season;$('fPublicRating').value=d.public_rating;$('fDescription').value=d.summary;c.classList.remove('show');if(d.public_rating)toast('已填充番剧信息')}catch{c.innerHTML='<div class="sr-none">获取详情失败</div>'}})});}catch{c.innerHTML='<div class="sr-none">搜索失败，请手动输入</div>'}}
+async function fetchSubjectDetail(id){const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),8000);const r=await fetch('https://api.bgm.tv/v0/subjects/'+id,{signal:controller.signal});clearTimeout(tid);if(!r.ok)throw Error();const data=await r.json();let year='',season='';if(data.date){const p=data.date.split('-');year=p[0]||'';season=getSeason(parseInt(p[1])||0)}const summary=data.summary?data.summary.replace(/<[^>]+>/g,'').trim():'';return{title:data.name_cn||data.name||'',alt_title:(data.name_cn&&data.name!==data.name_cn)?data.name:'',cover:data.images?.large||'',year,season,total_episodes:data.eps||data.total_episodes||0,public_rating:data.rating?.score?data.rating.score.toFixed(1):'',summary}}
+function openSettings(){updateBackupInfo();const r=animeList.filter(a=>a.rating>0);const avg=r.length?(r.reduce((s,a)=>s+a.rating,0)/r.length).toFixed(1):'暂无';const te=animeList.reduce((s,a)=>s+(a.watched_episodes||0),0);$('statSummary').innerHTML='总记录: '+animeList.length+' 部<br>总观看: '+te+' 集<br>评分人数: '+r.length+'<br>平均评分: '+avg+'/10';$('settingsModal').classList.add('show')}
+function closeSettings(){$('settingsModal').classList.remove('show')}
+function exportData(){if(!animeList.length){toast('没有数据可导出','err');return}const blob=new Blob([JSON.stringify(animeList,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='anime_'+nowStr()+'.json';a.click();URL.revokeObjectURL(blob);toast('已导出 '+animeList.length+' 条记录')}
+function importData(file){const r=new FileReader();r.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();let added=0,skipped=0;data.forEach(item=>{if(!item.title||typeof item.title!=='string')return;if(animeList.some(x=>x.title.toLowerCase()===item.title.toLowerCase())){skipped++;return}animeList.push({id:genId(),title:item.title,alt_title:item.alt_title||'',total_episodes:typeof item.total_episodes==='number'?item.total_episodes:0,watched_episodes:typeof item.watched_episodes==='number'?item.watched_episodes:0,status:['wish','watching','completed','dropped','paused'].includes(item.status)?item.status:'wish',rating:typeof item.rating==='number'?item.rating:0,public_rating:typeof item.public_rating==='number'?item.public_rating:0,cover_url:item.cover_url||'',start_date:item.start_date||'',end_date:item.end_date||'',year:item.year||null,season:item.season||'',tags:Array.isArray(item.tags)?item.tags:[],comment:item.comment||'',description:item.description||'',createdAt:item.createdAt||nowISO(),updatedAt:nowISO()});added++});saveData();renderAll();toast('导入 '+added+' 个，跳过 '+skipped+' 个重复')}catch{toast('文件格式错误','err')}};r.onerror=()=>toast('文件读取失败','err');r.readAsText(file)}
+function resetAllData(){if(!animeList.length){toast('已经是空的了','err');return}if(!confirm('确定要清空所有番剧记录吗？\n此操作不可恢复，建议先导出备份！'))return;const total=animeList.length;animeList=[];saveData();renderAll();toast('已清空 '+total+' 条记录')}
+function renderMarkdown(t){if(!t)return'';let h=esc(t);h=h.replace(/```([\s\S]*?)```/g,'<pre><code>$1</code></pre>');h=h.replace(/`([^`]+)`/g,'<code>$1</code>');h=h.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');h=h.replace(/\*([^*]+)\*/g,'<em>$1</em>');h=h.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%">');h=h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');h=h.replace(/^- (.+)$/gm,'<li>$1</li>');h=h.replace(/\n/g,'<br>');return h}
+const MK=SK+'_memo';
+
+function loadMemo(){return localStorage.getItem(MK)||''}
+function saveMemo(t){localStorage.setItem(MK,t)}
+function openMemo(){const c=loadMemo();$('memoEditor').value=c;$('memoEditor').style.display='block';$('memoPreview').style.display='none';$('memoPreview').innerHTML='';$('memoModal').classList.add('show');setTimeout(showMemoImages,50)}
+function previewMemo(){const t=$('memoEditor').value;$('memoPreview').innerHTML='<div class="memo-md-body">'+renderMarkdown(t)+'</div>';$('memoEditor').style.display='none';$('memoPreview').style.display='block'}
+function editMemo(){$('memoEditor').style.display='block';$('memoPreview').style.display='none'}
+function closeMemo(){$('memoModal').classList.remove('show')}
+function saveMemoAndClose(){const t=$('memoEditor').value;saveMemo(t);closeMemo();toast('备忘录已保存')}
+function insertMemoImage(url){try{var ta=document.getElementById("memoEditor"),s=ta.selectionStart,e=ta.selectionEnd,t=ta.value;ta.value=t.slice(0,s)+"![]("+url+")"+t.slice(e);ta.focus();saveMemo(ta.value);showMemoImages();setTimeout(function(){previewMemo()},300)}catch(ex){toast("图片插入失败","err")}}
+function showMemoImages(){var ta=$('memoEditor'),s=$('memoImgStrip'),m=ta.value.match(/!\[([^\]]*)\]\(([^)]+)\)/g);if(!m||!m.length){s.style.display='none';s.innerHTML='';return}var done={};s.style.display='flex';s.innerHTML='';m.forEach(function(x){var r=x.match(/!\[([^\]]*)\]\(([^)]+)\)/);if(r&&r[2]&&!done[r[2]]){done[r[2]]=1;var img=document.createElement('img');img.src=r[2];img.style.maxHeight='80px';img.style.borderRadius='6px';img.style.border='1px solid var(--border)';s.appendChild(img)}})}
+function handleMemoPaste(e){const items=e.clipboardData.items;for(let i=0;i<items.length;i++){if(items[i].type.indexOf('image')!==-1){e.preventDefault();const file=items[i].getAsFile();if(!file)continue;if(file.size>5*1024*1024){toast('图片超过 5MB 限制','err');return}const reader=new FileReader();reader.onload=function(ev){insertMemoImage(ev.target.result);toast('图片已插入')};reader.readAsDataURL(file);return}}}
+function uploadMemoImage(file){if(!file)return;if(file.size>5*1024*1024){toast('图片超过 5MB 限制','err');return}const reader=new FileReader();reader.onload=function(ev){insertMemoImage(ev.target.result);toast('图片已插入')};reader.readAsDataURL(file)}
+
+
+function init(){loadData();viewToggle.textContent=displayMode==='grid'?'⊞':'⊟';const ds=document.querySelector('#statsBar .sc-clickable[data-tab="all"]');if(ds)ds.classList.add('active');renderAll();populateYearFilter();updateHeaderCount();updateBackupInfo();$('statSummary').textContent='加载中...';document.querySelectorAll('#statsBar .sc-clickable').forEach(el=>{el.addEventListener('click',()=>{const tab=el.dataset.tab;if(!tab)return;document.querySelectorAll('#statsBar .sc-clickable').forEach(s=>s.classList.remove('active'));el.classList.add('active');currentStatus=tab;currentPage=1;renderGrid()})});let st;searchInput.addEventListener('input',()=>{clearTimeout(st);st=setTimeout(()=>{currentSearch=searchInput.value.trim();currentPage=1;renderGrid()},300)});sortSelect.addEventListener('change',()=>{currentSort=sortSelect.value;currentPage=1;renderGrid()});filterYearEl.addEventListener('change',()=>{filterYear=filterYearEl.value;currentPage=1;renderGrid()});filterSeasonEl.addEventListener('change',()=>{filterSeason=filterSeasonEl.value;currentPage=1;renderGrid()});filterRatingEl.addEventListener('change',()=>{filterRating=filterRatingEl.value;currentPage=1;renderGrid()});viewToggle.addEventListener('click',()=>{displayMode=displayMode==='grid'?'list':'grid';localStorage.setItem(SK+'_view',displayMode);viewToggle.textContent=displayMode==='grid'?'⊞':'⊟';renderGrid()});fabAdd.addEventListener('click',()=>openForm());window.addEventListener('scroll',()=>{const cy=window.scrollY;if(cy>lastScrollY&&cy>100)fabAdd.classList.add('fab-hidden');else fabAdd.classList.remove('fab-hidden');lastScrollY=cy},{passive:true});$('fTitle').addEventListener('input',()=>{clearTimeout(searchTimer2);const v=$('fTitle').value.trim();if(!v){$('searchResults').classList.remove('show');return}searchTimer2=setTimeout(()=>searchAnime(v),400)});$('fTitle').addEventListener('blur',()=>setTimeout(()=>$('searchResults').classList.remove('show'),200));$('fTitle').addEventListener('focus',()=>{if($('searchResults').children.length>0)$('searchResults').classList.add('show')});$('btnFormSave').addEventListener('click',saveForm);$('btnFormCancel').addEventListener('click',closeForm);$('formModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeForm()});$('fStatus').addEventListener('change',autoFillWatched);$('fTotal').addEventListener('input',autoFillWatched);$('btnSettings').addEventListener('click',openSettings);$('btnSettingsClose').addEventListener('click',closeSettings);$('settingsModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings()});$('btnExport').addEventListener('click',exportData);$('btnImportTrigger').addEventListener('click',()=>$('btnImport').click());$('btnImport').addEventListener('change',e=>{if(e.target.files[0]){importData(e.target.files[0]);e.target.value=''}});$('btnRestoreBackup').addEventListener('click',restoreFromBackup);$('btnClearBackups').addEventListener('click',()=>{if(confirm('确定清除所有备份？'))clearBackups()});$('btnResetData').addEventListener('click',resetAllData);$('memoTrigger').addEventListener('click',openMemo);$('memoSaveBtn').addEventListener('click',saveMemoAndClose);$('memoCloseBtn').addEventListener('click',closeMemo);$('memoModal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeMemo()});$('memoEditBtn').addEventListener('click',editMemo);$('memoPreviewBtn').addEventListener('click',previewMemo);$('memoImgBtn').addEventListener('click',()=>$('memoFileInput').click());$('memoFileInput').addEventListener('change',function(e){if(e.target.files[0]){uploadMemoImage(e.target.files[0]);e.target.value=''}});$('memoEditor').addEventListener('paste',handleMemoPaste);$('memoEditor').addEventListener('input',showMemoImages);$('coverFileInput').addEventListener('change',function(e){const file=e.target.files[0];if(!file||!coverChangingId)return;const reader=new FileReader();reader.onload=function(ev){const a=animeList.find(x=>x.id===coverChangingId);if(a){a.cover_url=ev.target.result;a.updatedAt=nowISO();saveData();renderAll();toast('封面已更新')}coverChangingId=null};reader.readAsDataURL(file);this.value=''});$('viewerClose').addEventListener('click',()=>$('viewerModal').classList.remove('show'));$('viewerModal').addEventListener('click',e=>{if(e.target===e.currentTarget)$('viewerModal').classList.remove('show')});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeForm();closeSettings();closeMemo()}if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)){e.preventDefault();searchInput.focus()}});}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init)}else{init()}
+window.nareSay=function(){};window.nareHide=function(){};
+
+})();
+</script>
+
+<!-- Live2D Widget -->
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/stevenjoezhang/live2d-widget@v0.8.4/waifu.css">
+<script src="https://gcore.jsdelivr.net/gh/stevenjoezhang/live2d-widget@v0.8.4/live2d.min.js"></script>
+<script src="https://gcore.jsdelivr.net/gh/stevenjoezhang/live2d-widget@v0.8.4/waifu-tips.js"></script>
+<script>
+// 看板娘初始化 - 加载静态模型列表，不依赖PHP API
+try {
+  if (typeof initWidget === 'function') {
+    initWidget({
+      cdnPath: 'https://gcore.jsdelivr.net/gh/fghrsh/live2d_api/',
+      apiPath: 'https://gcore.jsdelivr.net/gh/fghrsh/live2d_api/',
+      waifuPath: 'https://gcore.jsdelivr.net/gh/stevenjoezhang/live2d-widget@v0.8.4/waifu-tips.json',
+      tools: ['switch-texture', 'photo', 'info', 'quit'],
+      drag: true
+    });
+  }
+} catch(e) {}
+
+// 备用加载：8秒后检查模型是否加载成功，失败则直接加载
+setTimeout(function() {
+  var canvas = document.getElementById('live2d');
+  if (!canvas || typeof loadlive2d !== 'function') return;
+  var w = parseInt(canvas.getAttribute('width'));
+  var h = parseInt(canvas.getAttribute('height'));
+  if (w > 0 && h > 0) return; // 模型已加载成功
+  // 直接读取model_list.json加载模型
+  fetch('https://gcore.jsdelivr.net/gh/fghrsh/live2d_api/model_list.json').then(function(r){return r.json()}).then(function(list){
+    if (list && list.length>0 && list[0].model) {
+      loadlive2d(canvas, 'https://gcore.jsdelivr.net/gh/fghrsh/live2d_api/'+list[0].model);
+    }
+  }).catch(function(){});
+}, 8000);
+
+// 动漫主题互动台词
+(function(){
+  var quotes = ['今天的风儿好喧嚣啊～','这番你追到哪了？','呐，最喜欢动漫了！','一起成为动漫高手吧！','这部番我吹爆！','啊～这个季度好多想追的！','又在补旧番吗？真有品味！','评分系统真好用呢～','你的追番列表好整齐！','今天也要元气满满地看番哦！',
+    '诶嘿嘿，被发现了吗','那个…能陪我聊聊天吗？','注意休息哦，眼睛会累的','这番的OP太好听了！','啊～这番好甜，血糖上升了！','不要熬夜看番哦～','这个季度你追了多少部？','你的品味真不错呢！','嗯？有新的想看了吗？','快去补番吧，别磨蹭了～',
+    '要给你推荐一部好番吗？','神作！必须是神作！','完结撒花～','这番的ED也好评！','你收藏了好多番啊！','统计数据又更新了哦','每一部番都是一段旅程呢','诶～打分了吗？','这个角色我超喜欢的！','作画好精美！',
+    '啊，又是胃药番…','名场面打卡！','进度条暴露了一切','这番我看了三遍了！','经典就是经典啊','新番导视看了吗？','追番是一种态度！','你的列表里好多宝藏','要扩列吗？互相安利呀','补完这部番我就要好好学习了…大概',
+    '真香定律永远适用','这部番改变了我的人生观','这个分镜太帅了！','声优阵容好强大！','原著党在此！','动画工坊的制作就是精致','京阿尼永远的神！','MAPPA的制作水平绝了！','人类的赞歌就是勇气的赞歌！','别人与我无关，我只走我自己的路！',
+    '我可是要成为海贼王的男人！','数据这东西，有时候也会说谎呢','真相只有一个！','因为我喜欢你，比世界上任何人都要喜欢','已经没什么好害怕的了','今天的我甚至凌驾于阿修罗之上','如果手上没有剑，我就不能保护你','我可是很厉害的，别小看我！',
+    '羁绊是那不可切断的缘分','我可是拼尽全力了！','我相信着，相信着大家','这个世界没有奇迹，只有必然和偶然','让我来教教你什么叫做真正的绝望','我燃起来了！','连我都不知道的明天，好让人期待啊','我已经不想再失去任何人了',
+    '人类是不断重复过去的动物','即使再微弱的光芒，汇聚起来也能照亮黑暗','我是要成为火影的男人！','不能逃避，不能逃避，不能逃避！','我只有被打倒才会知道对手的强大','只要微笑就好了','人活着就是为了改变世界','我不知道，但我相信着',
+    '所谓强者，就是保护弱小的人','我很好奇！','来吧，让我听听你的愿望','约定就是约定，一定要遵守','我的字典里没有不可能这个词','与其想着怎么华丽地死去，不如想想怎样华丽地活下去','名為朋友的武器，才是這世上最強大的','人在保护重要的人时就会变得很强',
+    '这个世界并不美丽，却也因此而美丽','绊是看不见的','我讨厌你，但更讨厌软弱的自己','我的征途是星辰大海','错的不是我，是这个世界！','連企鵝都看得比你清楚','就算只有一次也好，我想要赢','只要活着，就一定有好事发生',
+    '我并不是孤单一人的','正因为有限，所以才要不断前进','这种事情，绝对很奇怪啊','不要小看我们之间的羁绊啊！','我们都在命运之路上行走','一个人的话可能会不安，但有你在就没问题','未来不是别人给予的，是自己创造的','既然选择了远方，便只顾风雨兼程',
+    '就算改变过去，也改变不了现在的感情','我决定要相信伙伴','所谓正确，不过是多数人的偏见','如果你有时间想那些漂亮借口，不如想想怎么帮我','不要低头，王冠会掉','我的人生真是充满了波澜壮阔','天才是1%的灵感加上99%的汗水','让我们来细数你的罪恶吧',
+    '我， machine， 在算计着','朋友是必须要守护的东西','每个人心中都有属于自己的正义','憧憬是离理解最远的感情','既然赢不了，那就不要输','让我看看你的觉悟！','人不能永远在同一个地方打转','所谓成长，就是不断超越过去的自己',
+    '如果是你的话，一定可以的','世界的秘密，就像果实的种子','我的内心在告诉我，不能就此止步','只要不放弃，一定会有转机','人生的答案不止一个','比鬼神更可怕的是人心','这就是我的忍道！','我已经看到了，结局',
+    '來吧，讓我們一同前往','我可是经历过地狱的女人','这份心情，不是虚假的','一切都在我的计划之中','即使如此，我也要前进','因为我是天才嘛！','人想要得到什么，就要付出相应的代价','你以为我是谁啊！',
+    '我从未见过如此厚颜无耻之人','给我一个支点，我能撬动整个地球','在这一刻，我就是上帝','人类的可能性是无限的','你还差得远呢','我要用这双手，改变一切','万物皆流，万物皆变','命运是可以改变的',
+    '就算是垃圾，也有用处','全速前进！Yosoro！','我的心，雀跃不已','还没结束呢！','时间可以冲淡一切，却冲不掉回忆','当你想放弃的时候，想想为什么开始','人生就像一场马拉松','我就是规则！',
+    '有趣！事情变得有趣起来了！','真相永远只有一个','世界很残酷，也很温柔','我が生涯に一片の悔いなし','我们是穿梭在银河的火箭队','冷静思考，大胆行动','没有所谓的废柴，只有没找到位置的天才','我最讨厌放弃了！',
+    '既然要做，就做到最好','我会用事实来证明','所谓奇迹，就是努力的另一个名字','我们分开的时候，要像在一起时一样','有时候，放弃也是一种选择','比起逃避，我选择面对','世界不是围绕着任何人旋转的','最强的武器是人心',
+    '风停了，雨停了，你觉得自己又行了','我们需要的是勇气与希望','青春是一首未完的歌','你的眼神已经出卖了你','身体在燃烧，在低吟','人类是有极限的','被讨厌也是活着的证明','只要相信，就能看见',
+    '没有人知道明天会发生什么','这个世界需要英雄','因为我是主角啊！','我们都在寻找属于自己的答案','相信自己，相信伙伴','不管什么时候，都要保持微笑','现实往往比故事更加离奇','我们不会止步不前',
+    '把不可能变成可能','这就是我的答案！','燃烧吧，我的小宇宙！','人这一生，总要疯狂一次','世界は美しくなんかない。そしてそれ故に、美しい','对得起自己的良心就好','不要小看生命的顽强','太阳照常升起，日子还要继续',
+    '这就是所谓的青春啊','所谓的王道，就是一步一步走出来的','要成为超越传说的人','幸福是要靠自己争取的','这里交给我，你先走！','我可是很强的好吗！','我就是正义！','人生が楽しければ、それでいい',
+    '人的梦想是不会终结的！','世界是残酷的，但也是美丽的','你能听到吗，这心跳的声音','即使如此，世界依旧美丽','我接受这个挑战','让我听到你的声音！','站起来，向前看','愛してる',
+    '不要小看人类的可能性','这个宇宙充满了奇迹','感谢相遇，感谢陪伴','无论在哪里，我都会找到你','我想守护大家的笑容','最可怕的不是失败，而是没有尝试','我们还有很长的路要走','热血沸腾起来了！',
+    '这就是羁绊啊','不管明天如何，今天还要继续','穿越时空，只为了遇见你','所谓成长就是不断超越自己','你相信引力吗？','这只是开始而已','超越自我，突破极限','你有着无限的可能性',
+    '我就是我，不一样的烟火','想要得到什么，就要付出相应的代价','答案就在眼前','只要心还在跳动，就不会停止','为了你，我可以与世界为敌','一起走吧，去更远的地方','无论何时都要保持优雅','这个笑容由我来守护',
+    '没有什么事是一蹴而就的','让我们一起见证吧','活着本身就是一种奇迹','再努力一点点，就能碰到星星了','这是一个关于成长的故事','我们都在同一条船上','面对疾风吧！','青春就是用来挥霍的',
+    '前方高能预警！','有光的地方就有影子','让我们并肩作战','不管发生什么，我都不会放弃','所谓成熟就是该哭的时候哭，该笑的时候笑','历史的车轮正在转动','命运不是用来顺从的，是用来抗争的','我相信每个人心中都有光',
+    '你并不孤单','抬起头，向前走','这就是我的正义！','心之所向，素履以往','世界这么大，我想去看看','阳光总在风雨后','让我们一起创造奇迹','做自己，因为你就是你',
+    '故事还在继续','人之所以能，是因为相信能','不是因为看到希望才坚持，而是因为坚持才看到希望','在这残酷的世界里，温柔是最强大的力量','勇敢不是不害怕，而是害怕之后依然选择前进','每个人都活在自己的故事里','未来是由无数个现在组成的',
+    '我相信友情的力量','命运是可以被改变的','因为有你，世界才更加美好','我们终将到达梦想的彼岸','愿你与重要的人再次相聚'
+  ];
+  var idx = 0;
+  function showQ() {
+    var msg = quotes[idx]; idx = (idx + 1) % quotes.length;
+    if (typeof window.showMessage === 'function') { window.showMessage(msg, 5000, true); return; }
+    var el = document.getElementById('waifu-tips');
+    if (el) { el.style.opacity = '1'; el.textContent = msg; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; }
+  }
+  function bindClick() {
+    var w = document.querySelector('.waifu') || document.getElementById('waifu');
+    if (!w) { setTimeout(bindClick, 300); return; }
+    w.addEventListener('click', function(e) {
+      if (e.target.tagName === 'CANVAS' || e.target.id === 'live2d') { showQ(); resetIdle(); }
+    });
+    // 再次召唤检测
+    var quitBtn = w.querySelector('.fa-times');
+    if (quitBtn) {
+      quitBtn.addEventListener('click', function() {
+        var cb = function(){ if (w.style.display === 'none' || w.style.opacity === '0') {
+          var btn = document.getElementById('nare-recall2');
+          if (!btn) {
+            btn = document.createElement('div'); btn.id = 'nare-recall2';
+            btn.textContent = '召唤看板娘';
+            btn.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:999;background:#e94560;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:13px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.3);font-family:var(--font)';
+            document.body.appendChild(btn);
+            btn.onclick = function(){ w.style.display = ''; w.style.opacity = ''; btn.remove(); };
+          }
+        } };
+        setTimeout(cb, 2000);
+      });
+    }
+    // 闲置台词
+    var idleTimer;
+    function resetIdle() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function() { if (w.style.display !== 'none') showQ(); resetIdle(); }, 14000);
+    }
+    resetIdle();
+  }
+  // nareSay 桥接
+  window.nareSay = function(msg) { showQ(msg); };
+  window.nareHide = function() {
+    var w = document.querySelector('.waifu') || document.getElementById('waifu');
+    if (w) { w.style.transition = 'opacity .6s ease'; w.style.opacity = '0'; setTimeout(function(){ w.style.display = 'none'; }, 600); }
+  };
+  if (document.readyState === 'complete') { setTimeout(bindClick, 500); }
+  else { document.addEventListener('readystatechange', function(){ if (document.readyState === 'complete') setTimeout(bindClick, 500); }); }
+})();
+</script>
+</body>
+</html>
+
